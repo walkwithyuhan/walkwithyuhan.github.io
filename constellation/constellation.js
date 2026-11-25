@@ -88,7 +88,7 @@ downloadButton.addEventListener('click', () => {
     label.textContent = value; svg.append(label);
   }
   text(585, nameInput.value.trim() || 'My little constellation', '28', '#f4b6cf');
-  text(625, 'Made in Yuhan’s Mini (messy) Universe', '15', '#bdb5ce');
+  text(625, 'Made in Yuhan’s little afternoon', '15', '#bdb5ce');
   const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], {type: 'image/svg+xml'}));
   const link = document.createElement('a'); link.href = url; link.download = 'my-little-constellation.svg';
   document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);

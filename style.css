@@ -81,3 +81,10 @@ footer{padding-bottom:95px}
 .motion-paused .drifting-leaves i,.scene-offscreen .drifting-leaves i{animation-play-state:paused}
 @media(max-width:700px){.drifting-leaves i{width:12px;height:7px}.drifting-leaves i:nth-child(n+4){display:none}}
 @media(prefers-reduced-motion:reduce){.drifting-leaves{display:none}}
+
+/* Meet the flowers before exploring the creations they hold. */
+.flower-introduction{min-height:130px;max-width:310px;margin:0 auto 15px;text-align:center}
+.flower-introduction strong{display:block;font:400 22px/1.3 Georgia,serif;color:var(--ink);margin-bottom:10px}
+.flower-introduction p{font:16px/1.6 'DM Sans',sans-serif;color:var(--muted);margin:0;text-wrap:pretty}
+@media(max-width:1000px) and (min-width:701px){.flower-introduction{min-height:150px}.flower-introduction strong{font-size:21px}}
+@media(max-width:700px){.flower-introduction{min-height:0;max-width:290px;margin-bottom:18px}.flower-introduction strong{font-size:23px}.flower-garden{gap:48px}}

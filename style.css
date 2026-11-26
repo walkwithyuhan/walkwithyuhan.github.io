@@ -59,3 +59,25 @@ footer{padding-bottom:95px}
 .music-status{font-size:14px;max-width:280px;padding:10px 14px;background:var(--paper);border-radius:12px;margin:8px 0 0}
 @media(max-width:1100px){.nav{padding-left:10vw}.brand{font-size:21px}.brand em{font-size:18px}}
 @media(max-width:700px){.nav{padding:16px 22px;flex-wrap:wrap;justify-content:center;gap:10px}.brand{font-size:21px;gap:9px}.brand em{font-size:18px}.brand img{width:51px;height:51px}.nav nav{gap:20px}.music-status{font-size:14px}}
+
+/* A few soft leaves cross the scene, with quiet gaps between passes. */
+.drifting-leaves{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.drifting-leaves i{position:absolute;top:0;left:var(--leaf-left);width:21px;height:11px;border-radius:90% 10% 80% 20%;background:linear-gradient(135deg,#b8bd69,#718d56 72%,#a2aa63);box-shadow:inset 0 0 3px #fffdf560;opacity:0;animation:leaf-drift var(--leaf-duration) var(--leaf-delay) linear infinite;will-change:transform}
+.drifting-leaves i::after{content:"";position:absolute;left:2px;right:2px;top:50%;height:1px;background:#e7e5b37a;transform:rotate(-15deg)}
+.drifting-leaves i:nth-child(1){--leaf-left:-4%;--leaf-duration:27s;--leaf-delay:-5s}
+.drifting-leaves i:nth-child(2){--leaf-left:16%;--leaf-duration:32s;--leaf-delay:-21s;width:13px;height:7px}
+.drifting-leaves i:nth-child(3){--leaf-left:39%;--leaf-duration:29s;--leaf-delay:-6s;background:linear-gradient(135deg,#c7bd78,#8e9a5d)}
+.drifting-leaves i:nth-child(4){--leaf-left:62%;--leaf-duration:35s;--leaf-delay:-29s;width:12px;height:6px}
+.drifting-leaves i:nth-child(5){--leaf-left:80%;--leaf-duration:31s;--leaf-delay:-2s}
+@keyframes leaf-drift{
+ 0%{opacity:0;transform:translate3d(-3vw,-8vh,0) rotate(-35deg)}
+ 5%{opacity:.75;transform:translate3d(0,1vh,0) rotate(10deg)}
+ 17%{opacity:.75;transform:translate3d(8vw,25vh,0) rotate(95deg) rotateY(30deg)}
+ 29%{opacity:.65;transform:translate3d(5vw,50vh,0) rotate(160deg) rotateY(65deg)}
+ 42%{opacity:.75;transform:translate3d(16vw,77vh,0) rotate(235deg) rotateY(-15deg)}
+ 55%{opacity:0;transform:translate3d(21vw,108vh,0) rotate(325deg)}
+ 100%{opacity:0;transform:translate3d(21vw,108vh,0) rotate(325deg)}
+}
+.motion-paused .drifting-leaves i,.scene-offscreen .drifting-leaves i{animation-play-state:paused}
+@media(max-width:700px){.drifting-leaves i{width:12px;height:7px}.drifting-leaves i:nth-child(n+4){display:none}}
+@media(prefers-reduced-motion:reduce){.drifting-leaves{display:none}}

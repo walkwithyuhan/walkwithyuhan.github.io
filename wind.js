@@ -30,9 +30,10 @@
     vec2 uv=v_uv;
     vec4 original=paintingAt(uv);
     float sides=max(1.0-smoothstep(0.12,0.33,uv.x),smoothstep(0.67,0.90,uv.x));
-    float canopy=smoothstep(0.16,0.42,uv.y);
-    float wind=sides*canopy*u_strength;
-    float gust=sin(u_time*1.1+uv.y*10.0)*0.0032;
+    float canopy=smoothstep(0.12,0.24,uv.y);
+    // All treetops share the breeze; distant foliage moves more gently.
+    float wind=(0.48+0.52*sides)*canopy*u_strength;
+    float gust=sin(u_time*1.1+uv.y*10.0+uv.x*9.0)*0.0032;
     float flutter=sin(u_time*2.1+uv.y*46.0+uv.x*32.0)*0.0015;
     uv.x+=(gust+flutter)*wind;
     uv.y+=sin(u_time*1.6+uv.x*35.0+uv.y*25.0)*0.0020*wind;

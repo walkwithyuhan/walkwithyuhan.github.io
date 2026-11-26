@@ -31,15 +31,15 @@
     vec4 original=paintingAt(uv);
     float sides=max(1.0-smoothstep(0.12,0.33,uv.x),smoothstep(0.67,0.90,uv.x));
     float canopy=smoothstep(0.16,0.42,uv.y);
-    float wind=sides*canopy*u_strength*leafMask(original.rgb);
-    float gust=sin(u_time*0.66+uv.y*8.0)*0.0008;
-    float flutter=sin(u_time*1.25+uv.y*29.0+uv.x*17.0)*0.0005;
+    float wind=sides*canopy*u_strength;
+    float gust=sin(u_time*1.1+uv.y*10.0)*0.0032;
+    float flutter=sin(u_time*2.1+uv.y*46.0+uv.x*32.0)*0.0015;
     uv.x+=(gust+flutter)*wind;
-    uv.y+=sin(u_time*0.83+uv.x*20.0+uv.y*13.0)*0.0008*wind;
+    uv.y+=sin(u_time*1.6+uv.x*35.0+uv.y*25.0)*0.0020*wind;
     uv=clamp(uv,0.001,0.999);
     vec4 displaced=paintingAt(uv);
     // Never pull a branch into a leaf pixel as the foliage shifts.
-    gl_FragColor=mix(original,displaced,leafMask(displaced.rgb));
+    gl_FragColor=mix(original,displaced,leafMask(original.rgb)*leafMask(displaced.rgb));
    }`));
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program,gl.LINK_STATUS)) return;

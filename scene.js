@@ -58,29 +58,34 @@ if (location.hash === '#about' && !reducedMotion.matches) {
 }
 renderScroll();
 
-// The visitor chooses whether to load and play the song; nothing autoplays.
+// A native audio element keeps the song playing while visitors scroll.
 const musicButton = document.querySelector('.music-invite');
-const musicPanel = document.getElementById('music-panel');
-const musicEmbed = document.querySelector('.music-embed');
-function closeMusic() {
- musicPanel.hidden = true;
- musicButton.setAttribute('aria-expanded','false');
- musicEmbed.replaceChildren();
- musicButton.focus({preventScroll:true});
+const musicLabel = document.querySelector('.music-label');
+const musicStatus = document.querySelector('.music-status');
+const music = document.getElementById('afternoon-music');
+music.volume = .35;
+let startingMusic = false;
+function showMusicState(playing) {
+ musicButton.setAttribute('aria-pressed', String(playing));
+ musicLabel.textContent = playing ? 'Pause music' : 'Enjoy a song I love with me.';
 }
-musicButton.addEventListener('click', () => {
- if (!musicPanel.hidden) { closeMusic(); return; }
- const player = document.createElement('iframe');
- player.src = 'https://open.spotify.com/embed/track/5vzDhLePmk0dQen49Xk4LB?utm_source=generator&theme=0';
- player.title = 'Into My Arms — Nick Cave & The Bad Seeds';
- player.width = '100%';
- player.height = '152';
- player.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
- player.setAttribute('allowfullscreen','');
- player.style.border = '0';
- musicEmbed.replaceChildren(player);
- musicPanel.hidden = false;
- musicButton.setAttribute('aria-expanded','true');
+function musicFailed() {
+ musicStatus.textContent = 'The song could not play. Please try again.';
+ musicStatus.hidden = false;
+ showMusicState(false);
+}
+musicButton.addEventListener('click', async () => {
+ if (startingMusic) return;
+ musicStatus.hidden = true;
+ if (!music.paused) { music.pause(); return; }
+ startingMusic = true;
+ try {
+  if (music.ended) music.currentTime = 0;
+  await music.play();
+ } catch { musicFailed(); }
+ finally { startingMusic = false; }
 });
-document.querySelector('.music-close').addEventListener('click', closeMusic);
-document.addEventListener('keydown', event => { if(event.key === 'Escape' && !musicPanel.hidden) closeMusic(); });
+music.addEventListener('playing', () => showMusicState(true));
+music.addEventListener('pause', () => showMusicState(false));
+music.addEventListener('ended', () => showMusicState(false));
+music.addEventListener('error', musicFailed);

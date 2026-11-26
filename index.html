@@ -5,10 +5,10 @@
   <title>A small afternoon with Yuhan</title>
   <meta name="description" content="A small afternoon with Yuhan. Little things I made, first sparked by my late grandma, who will always be loved and remembered.">
   <link rel="icon" href="logo.png" type="image/png">
-  <link rel="stylesheet" href="style.css?v=afternoon-2">
+  <link rel="stylesheet" href="style.css?v=garden-4">
 </head>
 <body>
-  <header class="nav"><a href="./" class="brand" aria-label="Yuhan home"><img src="logo.png" alt="" width="58" height="58"><span>yuhan</span></a><nav aria-label="Main navigation"><a href="#about">about us</a><a href="#things">little things</a></nav></header>
+  <header class="nav"><a href="./" class="brand" aria-label="Yuhan home"><img src="logo.png" alt="" width="58" height="58"><span>yuhan</span></a><nav aria-label="Main navigation"><a href="#about">about us</a><a href="#things">little things</a><button class="motion-toggle" type="button" aria-label="Reduce animation" aria-pressed="false" title="Reduce animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4C9 2 3 7 5 14c2 7 14 5 15-10Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 21 16 8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button></nav></header>
   <main>
     <section class="afternoon-journey" id="welcome" aria-label="A small afternoon with Yuhan">
       <span class="about-stop" id="about" aria-hidden="true"></span>
@@ -17,8 +17,7 @@
           <div class="scene-world">
             <img class="scene-painting" src="assets/afternoon.png" alt="" fetchpriority="high" width="1675" height="939">
             <img class="scene-story-painting" src="assets/afternoon-story.png" alt="" width="1675" height="939">
-            <div class="tree-layer tree-left"><img src="assets/afternoon.png" alt="" width="1675" height="939"></div>
-            <div class="tree-layer tree-right"><img src="assets/afternoon.png" alt="" width="1675" height="939"></div>
+            <canvas class="wind-canvas" aria-hidden="true"></canvas>
           </div>
         </div>
         <div class="scene-heading">
@@ -35,8 +34,7 @@
           <p>Whoever you are, thank you for visiting. I’m glad you’re here!</p>
           <span class="story-sign">stay a little while.</span>
         </article>
-        <button class="motion-toggle" type="button" aria-pressed="false">Pause breeze</button>
-        <a class="wander-link" href="#about">Scroll a little closer <span aria-hidden="true">⌁</span></a>
+
         <p class="visually-hidden">A peaceful painted lawn surrounded by leafy trees, with Yuhan and her husband sitting together, seen from behind. Their imaginary puppy Cookie sits beside them. Cookie is a puppy Yuhan doesn’t have in real life… YET.</p>
       </div>
     </section>
@@ -44,11 +42,33 @@
       <p class="eyebrow">LITTLE THINGS I MADE</p>
       <h2 id="collection-title">A little garden of creations.</h2>
       <p class="collection-intro">A place for curious thoughts to bloom.</p>
-      <a class="example-project" href="constellation/"><span class="example-star" aria-hidden="true">✧</span><span><strong>Make a constellation</strong><span>A little example to play with, while the garden grows.</span></span><span class="play-label">Play</span></a>
+      <div class="flower-garden">
+        <a class="flower-project" href="constellation/" aria-label="Open Make a constellation, a little example project">
+          <img class="project-orchid" src="assets/orchid.png" alt="A hand-painted pink, lilac, and blue Singapore orchid" width="928" height="1232" loading="lazy">
+          <span class="flower-caption"><strong>Make a constellation</strong><span>Connect a few stars and draw a constellation of your own.</span></span>
+        </a>
+        <article class="flower-project flower-coming-soon">
+          <img class="project-orchid" src="assets/ixora.png" alt="A hand-painted sprig of coral and orange ixora flowers" width="928" height="1232" loading="lazy">
+          <div class="flower-caption"><h3>To be created soon</h3><p>A little space for my next creation.</p></div>
+        </article>
+        <article class="flower-project flower-coming-soon">
+          <img class="project-orchid" src="assets/frangipani.png" alt="A hand-painted sprig of creamy-white frangipani flowers with golden centers" width="928" height="1232" loading="lazy">
+          <div class="flower-caption"><h3>To be created soon</h3><p>Something new will bloom here.</p></div>
+        </article>
+      </div>
       <p class="garden-note">more little things, in their own time.</p>
     </section>
   </main>
   <footer><span>A small afternoon with Yuhan</span><a href="#welcome">Back to the afternoon</a><span>For Grandma, with love.</span></footer>
-  <script src="scene.js?v=afternoon-2"></script>
+  <aside class="music-corner" aria-label="A song from Yuhan">
+    <div class="music-panel" id="music-panel" hidden>
+      <div class="music-panel-heading"><span>A song I love</span><button class="music-close" type="button" aria-label="Close music player">×</button></div>
+      <div class="music-embed"></div>
+      <a class="spotify-link" href="https://open.spotify.com/track/5vzDhLePmk0dQen49Xk4LB" target="_blank" rel="noopener noreferrer">Open in Spotify</a>
+    </div>
+    <button class="music-invite" type="button" aria-expanded="false" aria-controls="music-panel"><span aria-hidden="true">♫</span> Enjoy a song I love with me.</button>
+  </aside>
+  <script src="wind.js?v=garden-4"></script>
+  <script src="scene.js?v=garden-4"></script>
 </body>
 </html>

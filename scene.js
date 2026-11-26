@@ -2,12 +2,14 @@
 const journey = document.querySelector('.afternoon-journey');
 const scene = journey.querySelector('.scene');
 const story = scene.querySelector('.story-card');
-const toggle = scene.querySelector('.motion-toggle');
+const toggle = document.querySelector('.motion-toggle');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let paused = reducedMotion.matches;
 function updateMotion() {
  scene.classList.toggle('motion-paused', paused);
- toggle.textContent = paused ? 'Play breeze' : 'Pause breeze';
+ toggle.setAttribute('aria-label', paused ? 'Enable animation' : 'Reduce animation');
+ toggle.title = paused ? 'Enable animation' : 'Reduce animation';
+ document.body.classList.toggle('motion-paused', paused);
  toggle.setAttribute('aria-pressed', String(paused));
  toggle.hidden = reducedMotion.matches;
 }
@@ -31,7 +33,7 @@ function renderScroll() {
  scene.style.setProperty('--story-art-opacity', String(clamp((progress - .16) / .26)));
  scene.style.setProperty('--story-shift', `${(1 - storyOpacity) * 22}px`);
  story.classList.toggle('is-visible', storyOpacity > .5);
- scene.querySelector('.wander-link').tabIndex = progress > .35 ? -1 : 0;
+
 }
 function scheduleScroll() {
  if (!framePending) { framePending = true; requestAnimationFrame(renderScroll); }
@@ -55,3 +57,30 @@ if (location.hash === '#about' && !reducedMotion.matches) {
  requestAnimationFrame(() => { window.scrollTo(0, journey.offsetTop + (journey.offsetHeight - window.innerHeight) * .88); scheduleScroll(); });
 }
 renderScroll();
+
+// The visitor chooses whether to load and play the song; nothing autoplays.
+const musicButton = document.querySelector('.music-invite');
+const musicPanel = document.getElementById('music-panel');
+const musicEmbed = document.querySelector('.music-embed');
+function closeMusic() {
+ musicPanel.hidden = true;
+ musicButton.setAttribute('aria-expanded','false');
+ musicEmbed.replaceChildren();
+ musicButton.focus({preventScroll:true});
+}
+musicButton.addEventListener('click', () => {
+ if (!musicPanel.hidden) { closeMusic(); return; }
+ const player = document.createElement('iframe');
+ player.src = 'https://open.spotify.com/embed/track/5vzDhLePmk0dQen49Xk4LB?utm_source=generator&theme=0';
+ player.title = 'Into My Arms — Nick Cave & The Bad Seeds';
+ player.width = '100%';
+ player.height = '152';
+ player.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+ player.setAttribute('allowfullscreen','');
+ player.style.border = '0';
+ musicEmbed.replaceChildren(player);
+ musicPanel.hidden = false;
+ musicButton.setAttribute('aria-expanded','true');
+});
+document.querySelector('.music-close').addEventListener('click', closeMusic);
+document.addEventListener('keydown', event => { if(event.key === 'Escape' && !musicPanel.hidden) closeMusic(); });

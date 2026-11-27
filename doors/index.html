@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Doors · 门</title>
+<meta name="description" content="Open a door onto a life you didn't live, and talk to the person living it.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=Noto+Serif+SC:wght@300;400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --sky:#2f6fd0; --sky-deep:#1f4f9c; --card:#f7f0e2; --card-2:#efe3cd;
+    --ink:#17253d; --ink-dim:#4c5f7d; --ink-faint:#8798b2;
+    --red:#e4452f; --coral:#f3a195; --coral-deep:#e07d6e; --grass:#3e8f4c; --gold:#f0b43c;
+    --rule:#17253d; --shadow:4px 4px 0 var(--rule);
+    --grotesk:"Space Grotesk",system-ui,sans-serif;
+    --serif:"Newsreader",Georgia,serif;
+    --han:"Noto Serif SC","Songti SC",serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    color-scheme: light;
+  }
+  :root[data-skin="dusk"]{ --sky:#17306b; --sky-deep:#0e1f4a; --card:#f0e6d6; --card-2:#e3d5be;
+    --coral:#e2897f; --coral-deep:#c4675d; --grass:#2c6b3c; color-scheme: dark; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink); font-family:var(--serif); font-size:1.0625rem; line-height:1.6; font-weight:300;
+    background:var(--sky);
+    background-image:
+      radial-gradient(42% 26% at 12% 10%, var(--coral) 0 42%, transparent 62%),
+      radial-gradient(34% 20% at 88% 18%, var(--coral) 0 44%, transparent 64%),
+      radial-gradient(30% 18% at 70% 4%, var(--coral-deep) 0 40%, transparent 60%),
+      linear-gradient(var(--sky), var(--sky-deep));
+    background-attachment:fixed;
+    padding-left:max(16px, env(safe-area-inset-left,0px));
+    padding-right:max(16px, env(safe-area-inset-right,0px));
+  }
+  .wrap{max-width:37rem;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding-block:1.25rem .75rem;flex-wrap:wrap}
+  .mark{font-family:var(--grotesk);font-weight:700;font-size:1rem;color:var(--card);background:var(--red);
+    border:2px solid var(--rule);box-shadow:var(--shadow);padding:.3rem .7rem;text-decoration:none}
+  .mark .han{font-family:var(--han);font-weight:400}
+  .tools{display:flex;gap:.5rem}
+  button.link{font-family:var(--mono);font-size:.75rem;cursor:pointer;background:var(--card);color:var(--ink);
+    border:2px solid var(--rule);box-shadow:3px 3px 0 var(--rule);padding:.35rem .6rem}
+  button.link:hover{background:var(--gold)}
+  button.link:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rule)}
+  main{flex:1;padding-block:.5rem 3rem}
+  .block{background:var(--card);border:2px solid var(--rule);box-shadow:var(--shadow);padding:1.15rem 1.2rem;margin-bottom:1.1rem;position:relative}
+  .block>.tag{position:absolute;top:-.72rem;left:.9rem;font-family:var(--mono);font-size:.625rem;letter-spacing:.1em;
+    text-transform:uppercase;background:var(--rule);color:var(--card);padding:.1rem .45rem}
+  .studs{display:flex;gap:.35rem;margin-bottom:.75rem}
+  .studs i{width:.7rem;height:.7rem;border:2px solid var(--rule);border-radius:50%;background:var(--gold)}
+  .studs i:nth-child(2){background:var(--coral)} .studs i:nth-child(3){background:var(--grass)}
+  .corridor{text-align:center}
+  .doorbtn{background:none;border:0;padding:0;cursor:pointer;display:block;margin:0 auto;width:100%}
+  .doorimg{display:block;width:100%;height:auto;border:2px solid var(--rule);box-shadow:var(--shadow);
+    transition:transform .5s cubic-bezier(.2,.8,.3,1), filter .4s ease}
+  .doorbtn:hover .doorimg{transform:scale(1.015);filter:saturate(1.12) brightness(1.04)}
+  .doorbtn.going .doorimg{transform:scale(1.1);filter:saturate(1.3) brightness(1.12)}
+  .bait{font-size:1.125rem;font-style:italic;margin:1rem 0 0;text-wrap:balance}
+  .bait .han{display:block;margin-top:.45rem;font-style:normal;font-size:1rem;color:var(--ink-dim)}
+  .count{font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;color:var(--ink-faint);margin:1rem 0 0}
+  .fine{font-size:.78rem;font-style:italic;line-height:1.55;color:var(--ink-faint);margin:.5rem 0 0}
+  .fine.zh{font-family:var(--han)}
+  .place{font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em;color:var(--card);margin:0 0 .7rem;text-transform:uppercase}
+  .place .han{font-family:var(--han);text-transform:none}
+  .steps{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-family:var(--mono);font-size:.625rem;
+    letter-spacing:.08em;color:var(--card);margin-bottom:.6rem}
+  .steps b{font-weight:400;background:rgba(23,37,61,.45);padding:.15rem .4rem}
+  .steps b.on{background:var(--red)} .steps b.done{background:var(--grass)} .steps span{opacity:.6}
+  .scene p{margin:0 0 .9rem}
+  .scene p:first-of-type::first-letter{font-size:2.5em;float:left;line-height:.84;padding:.06em .12em 0 0;color:var(--red);font-family:var(--grotesk);font-weight:700}
+  .han{font-family:var(--han);font-weight:300}
+  .zh{font-family:var(--han);font-weight:300;color:var(--ink-dim);line-height:1.8}
+  .scene .zh{margin-top:1rem;padding-top:.9rem;border-top:2px dashed var(--ink-faint)}
+  .scene .zh p{margin:0 0 .75rem}
+  .looks{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.1rem}
+  .chip{font-family:var(--grotesk);font-weight:500;font-size:.8125rem;cursor:pointer;background:var(--card-2);
+    color:var(--ink);border:2px solid var(--rule);box-shadow:3px 3px 0 var(--rule);padding:.4rem .75rem}
+  .chip:hover{background:var(--gold)}
+  .chip:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rule)}
+  .chip.her{background:var(--red);color:var(--card)}
+  .chip.her:hover{background:var(--coral-deep)}
+  .chip.used{opacity:.5}
+  .chip .han{font-family:var(--han)}
+  .chip .idx{font-family:var(--mono);font-size:.6875rem;opacity:.7;margin-right:.35rem}
+  .found{margin-top:1rem;border-left:6px solid var(--coral);padding-left:.9rem}
+  .found p{margin:0 0 .5rem;font-style:italic}
+  .found .zh{font-style:normal;margin-bottom:1rem}
+  .found .idx{font-family:var(--mono);font-size:.625rem;background:var(--rule);color:var(--card);padding:.05rem .3rem;margin-right:.4rem}
+  .sit h2{font-family:var(--grotesk);font-size:1rem;font-weight:700;margin:0 0 .15rem}
+  .sit .h2zh{font-family:var(--han);font-size:.9375rem;color:var(--ink-dim);margin:0 0 .85rem}
+  .plate{display:grid}
+  .plate .r{display:grid;grid-template-columns:2rem 1fr;gap:.6rem;padding:.55rem 0;border-top:1px dotted var(--ink-faint)}
+  .plate .r:first-child{border-top:0}
+  .plate .n{font-family:var(--mono);font-size:.6875rem;color:var(--ink-faint);padding-top:.18rem}
+  .plate .v .zh{display:block;font-size:.9375rem;margin-top:.1rem}
+  .talk{display:grid;gap:1rem}
+  .turn{border-left:2px solid var(--ink-faint);padding-left:.75rem}
+  .turn.her{border-left-color:var(--red)}
+  .turn .who{font-family:var(--mono);font-size:.625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:.25rem}
+  .turn.you .said{color:var(--ink-dim)}
+  .turn.her .said{font-size:1.125rem}
+  .turn .zh{margin:.25rem 0 0;font-size:1rem}
+  .said{margin:0;white-space:pre-wrap}
+  .said em,.zh em{color:var(--ink-faint);font-style:italic}
+  form.ask{display:flex;gap:.5rem;margin-top:1rem}
+  input[type=text]{flex:1;min-width:0;background:#fff;color:var(--ink);border:2px solid var(--rule);
+    padding:.65rem .8rem;font-family:var(--serif);font-size:1rem}
+  textarea{width:100%;background:#fff;color:var(--ink);border:2px solid var(--rule);padding:.7rem .8rem;
+    font-family:var(--serif);font-size:1rem;line-height:1.55;margin-top:.9rem;resize:vertical}
+  input[type=text]:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+  .btn{font-family:var(--grotesk);font-weight:700;font-size:.8125rem;cursor:pointer;background:var(--card-2);
+    color:var(--ink);border:2px solid var(--rule);box-shadow:var(--shadow);padding:.65rem 1rem}
+  .btn:hover{background:var(--gold)}
+  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--rule)}
+  .btn .han{font-family:var(--han);font-weight:400}
+  .btn.warm{background:var(--red);color:var(--card)}
+  .btn.warm:hover{background:var(--coral-deep)}
+  .doorq .q{font-family:var(--grotesk);font-weight:500;margin:0 0 .15rem}
+  .doorq .qzh{font-family:var(--han);color:var(--ink-dim);margin:0 0 .9rem}
+  .row{display:flex;flex-wrap:wrap;gap:.6rem}
+  .thinking{font-family:var(--mono);font-size:.875rem}
+  .entry{border-left:8px solid var(--coral);padding-left:.9rem;margin-bottom:1.2rem}
+  .entry.stayed{border-left-color:var(--red)}
+  .entry .head{font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;color:var(--ink-faint)}
+  .entry .line{margin:.2rem 0 0}
+  .entry .tag2{font-family:var(--mono);font-size:.625rem;background:var(--red);color:var(--card);padding:.05rem .35rem}
+  .empty{font-style:italic;color:var(--ink-dim)}
+  .err{color:#9c2414;font-family:var(--mono);font-size:.875rem}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="mark" href="../#things">DOORS <span class="han">门</span></a>
+    <span class="tools">
+      <button class="link" id="skin"></button>
+      <button class="link" id="nav"></button>
+    </span>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script type="module">
+// ---- where the API lives. Change this to your deployed Worker. ----
+const API = "https://doors-api.YOUR-SUBDOMAIN.workers.dev";
+
+const QUESTIONS = [
+  { k:"age", en:"How old are you?", zh:"你多大？", ph:"31", free:true },
+  { k:"home", en:"Where did you grow up?", zh:"你在哪里长大？", ph:"a town, a city, a country", free:true },
+  { k:"city", en:"A city you almost moved to.", zh:"一个你差点搬去的城市。", ph:"the one you still think about", free:true,
+    opts:[{en:"There wasn't one", zh:"没有过", val:""}] },
+  { k:"quit", en:"What did you quit that you were good at?", zh:"你放弃了什么本来擅长的事？", ph:"or type your own", free:true,
+    opts:[{en:"An instrument",zh:"一个乐器",val:"playing an instrument"},{en:"A sport",zh:"一项运动",val:"a sport"},
+          {en:"Drawing or writing",zh:"画画或写作",val:"drawing and writing"},{en:"A subject",zh:"一门专业",val:"a subject they were good at"}] },
+  { k:"safe", en:"Someone offered you something safe.", zh:"有人给过你一份稳妥的东西。", ph:"or say what it was", free:true,
+    opts:[{en:"I took it",zh:"我接了",val:"a safe job or place they accepted"},{en:"I turned it down",zh:"我拒了",val:"a safe job or place they turned down"},
+          {en:"Never came up",zh:"没遇过",val:""}] },
+  { k:"met", en:"Who did you meet by accident, who changed everything?", zh:"谁是你偶然遇见、却改变了一切的人？", ph:"a name, or who they are to you", free:true,
+    opts:[{en:"A partner",zh:"伴侣",val:"the person they ended up with"},{en:"A friend",zh:"朋友",val:"the friend who changed things"},
+          {en:"A teacher or boss",zh:"老师或上司",val:"the teacher or boss who changed things"},{en:"Nobody",zh:"没有",val:""}] },
+  { k:"much", en:"What do you do too much of?", zh:"你做得过多的是什么？", ph:"or type your own", free:true,
+    opts:[{en:"Work",zh:"工作",val:"work"},{en:"Pleasing people",zh:"讨好别人",val:"trying to please people"},
+          {en:"Thinking",zh:"想",val:"thinking about it"},{en:"Looking after people",zh:"照顾别人",val:"looking after other people"},
+          {en:"Planning",zh:"计划",val:"planning"}] },
+  { k:"story", open:true, en:"Now tell me about your life.", zh:"最后，讲讲你的人生。",
+    sub:"Anything you like, in any order — where you've lived, what you nearly did, who mattered, what you're still deciding. The more you say, the less generic the people behind the doors will be. Type it or speak it.",
+    sub_zh:"想到哪说到哪 —— 你住过哪里、差点做了什么、谁要紧、你至今没想好的是什么。你说得越多，门后面那些人就越不像随便生成的。可以打字，也可以说话。",
+    ph:"I grew up in…" }
+];
+
+const LK = { ledger:"doors.ledger.w1", skin:"doors.skin.w1", mode:"doors.mode.w1", seed:"doors.seed.w1" };
+const S = { view:"start", mode:null, seed:{}, qi:0, door:null, token:null, history:[], looked:[], staying:false };
+const $ = s => document.querySelector(s);
+const main = () => $("#main");
+
+const get = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const set = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} };
+const ledger = () => { try { return JSON.parse(get(LK.ledger) || "[]"); } catch(e){ return []; } };
+const saveLedger = r => set(LK.ledger, JSON.stringify(r));
+
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = s => esc(s).replace(/\*\(([^)]*)\)\*/g,"<em>($1)</em>").replace(/\*([^*]+)\*/g,"<em>$1</em>");
+const paras = s => String(s||"").split(/\n\n+/).filter(Boolean).map(p=>`<p>${fmt(p)}</p>`).join("");
+const studs = () => `<div class="studs"><i></i><i></i><i></i></div>`;
+const steps = at => { const o=["SCENE","HER","TALK","DOOR"], i=o.indexOf(at);
+  return `<div class="steps">${o.map((s,k)=>`<b class="${k===i?"on":(k<i?"done":"")}">${s}</b>${k<3?"<span>─</span>":""}`).join("")}</div>`; };
+
+async function api(payload) {
+  const r = await fetch(API, { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify(payload) });
+  const data = await r.json().catch(()=>({error:"bad response"}));
+  if (!r.ok) throw Object.assign(new Error(data.error || "error"), { code: data.error, cap: data.cap });
+  return data;
+}
+
+function setNav(){ $("#nav").textContent = S.view==="ledger" ? "BACK" : "LEDGER " + ledger().length; }
+
+// ------------------------------------------------------------------ screens
+function renderStart(){
+  S.view="start";
+  main().innerHTML = `
+    <div class="block corridor"><span class="tag">Begin · 开始</span>
+      <img class="doorimg" src="door.webp" alt="A pink door standing open against a starry sky">
+      <p class="bait">Behind each of these doors a life you did not choose is quietly going on without you.
+        <span class="han">每一扇门后面，都有一种你没有选的人生，正自顾自地继续着。</span></p>
+      <div class="row" style="justify-content:center;margin-top:1.2rem">
+        <button class="btn warm" id="mine">WALK THROUGH YUHAN’S DOORS <span class="han">走进 Yuhan 的门</span></button>
+        <button class="btn" id="own">WALK THROUGH YOUR OWN <span class="han">走进你自己的门</span></button>
+      </div>
+      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. Don’t worry about privacy — what you write stays in your own browser, and nobody, including whoever made this, ever sees it.</p>
+      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。隐私不用担心：你写的东西只存在你自己的浏览器里，包括作者在内，没有任何人看得到。</p>
+    </div>`;
+  $("#mine").onclick = () => { S.mode="yuhan"; S.seed={}; set(LK.mode,"yuhan"); set(LK.seed,"{}"); renderCorridor(); };
+  $("#own").onclick = () => { S.mode="own"; S.seed={}; S.qi=0; renderQuestion(); };
+  setNav();
+}
+
+function renderQuestion(){
+  S.view="ask";
+  const i=S.qi, q=QUESTIONS[i], total=String(QUESTIONS.length).padStart(2,"0");
+  main().innerHTML = `
+    <div class="block"><span class="tag">${String(i+1).padStart(2,"0")} / ${total}</span>
+      ${studs()}
+      <p class="said" style="font-size:1.25rem">${esc(q.en)}</p>
+      <p class="said zh" style="font-size:1.0625rem">${esc(q.zh)}</p>
+      ${q.sub?`<p class="fine">${esc(q.sub)}</p><p class="fine zh">${esc(q.sub_zh||"")}</p>`:""}
+      ${q.opts?`<div class="looks">${q.opts.map((o,k)=>`<button class="chip" data-opt="${k}">${esc(o.en)} <span class="han">${esc(o.zh)}</span></button>`).join("")}</div>`:""}
+      ${q.open?`<textarea id="qtext" rows="7" placeholder="${esc(q.ph||"")}"></textarea>
+        <div class="row" style="margin-top:.8rem">
+          <button class="btn warm" id="qdone">DONE <span class="han">写完了</span></button>
+          <button class="btn" id="qmic" hidden>SPEAK <span class="han">说话</span></button>
+          <span class="count" id="qstate"></span>
+        </div>`:""}
+      ${q.free && !q.open?`<form class="ask" id="qform">
+        <input type="text" id="qinput" placeholder="${esc(q.ph||"")}" autocomplete="off">
+        <button class="btn" type="submit">NEXT <span class="han">下一个</span></button></form>`:""}
+      <p class="count" style="margin-top:1rem"><button class="link" id="skip">SKIP <span class="han">跳过</span></button></p>
+    </div>`;
+  const next = v => {
+    if (v) S.seed[q.k]=v;
+    S.qi++;
+    if (S.qi>=QUESTIONS.length){ set(LK.mode,"own"); set(LK.seed, JSON.stringify(S.seed)); renderCorridor(); }
+    else renderQuestion();
+  };
+  main().querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>next(q.opts[+b.dataset.opt].val));
+  if ($("#qform")) $("#qform").onsubmit = e => { e.preventDefault(); next($("#qinput").value.trim()); };
+  if ($("#qdone")) $("#qdone").onclick = () => next($("#qtext").value.trim());
+  $("#skip").onclick = () => next("");
+  if ($("#qinput")) $("#qinput").focus();
+  if (q.open) wireMic();
+  setNav();
+}
+
+// the browser's own speech recognition — Chrome and Edge have it, Safari mostly doesn't
+function wireMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn=$("#qmic"), box=$("#qtext"), st=$("#qstate");
+  if (!SR || !btn) return;
+  btn.hidden=false;
+  const rec = new SR();
+  rec.continuous = true; rec.interimResults = true;
+  rec.lang = (navigator.language||"en").toLowerCase().startsWith("zh") ? "zh-CN" : "en-US";
+  let base="", live=false;
+  rec.onresult = e => {
+    let interim="", final="";
+    for (let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if (e.results[i].isFinal) final+=t; else interim+=t;
+    }
+    if (final) base = (base?base+" ":"")+final.trim();
+    box.value = (base?base+" ":"")+interim;
+  };
+  rec.onstart = () => { live=true; btn.innerHTML='STOP <span class="han">停</span>'; st.textContent="listening · 在听"; };
+  rec.onend = () => { live=false; btn.innerHTML='SPEAK <span class="han">说话</span>'; st.textContent=""; };
+  rec.onerror = () => { st.textContent="voice unavailable · 请打字"; };
+  btn.onclick = () => { base = box.value.trim(); if (live) rec.stop(); else { try { rec.start(); } catch(e){} } };
+}
+
+function renderCorridor(bait, baitZh){
+  S.view="corridor"; S.door=null; S.token=null;
+  const n = ledger().length;
+  const en = bait || (n===0 ? "A corridor. One door. Behind it, a Tuesday you didn’t have."
+                            : "Another door. The air behind it is a different temperature.");
+  const zh = baitZh || (n===0 ? "一条走廊，一扇门。门后是你没过过的那个星期二。"
+                              : "又一扇门。门后的空气，温度不一样。");
+  main().innerHTML = `
+    <div class="block corridor"><span class="tag">Open · 开门</span>
+      <button class="doorbtn" id="open" aria-label="Open the door"><img class="doorimg" src="door.webp" alt=""></button>
+      <p class="bait">${fmt(en)}<span class="han">${fmt(zh)}</span></p>
+      <div class="row" style="justify-content:center;margin-top:1rem">
+        <button class="btn warm" id="open2">OPEN THE DOOR <span class="han">开门</span></button>
+      </div>
+      <p class="count">${n===0?"00 DOORS · 还没开过门":String(n).padStart(2,"0")+(n===1?" DOOR":" DOORS")+" · 开过 "+n+" 扇"}</p>
+    </div>`;
+  const go = () => { $("#open").classList.add("going"); setTimeout(openDoor, 320); };
+  $("#open").onclick = go; $("#open2").onclick = go;
+  setNav();
+}
+
+const placeLine = f => f ? `<p class="place">${esc(f.kind)} <span class="han">${esc(f.zh||"")}</span> · ${esc(f.hour)}</p>` : "";
+
+function renderScene(){
+  const d=S.door;
+  const chips=(d.looks||[]).map((l,i)=>`<button class="chip${S.looked.includes(i)?" used":""}" data-look="${i}"><span class="idx">${String(i+1).padStart(2,"0")}</span>${esc(l.label)} <span class="han">${esc(l.label_zh||"")}</span></button>`).join("");
+  const found=S.looked.map(i=>`<p><span class="idx">${String(i+1).padStart(2,"0")}</span>${fmt(d.looks[i].text)}</p><p class="zh">${fmt(d.looks[i].text_zh||"")}</p>`).join("");
+  main().innerHTML = `
+    ${steps("SCENE")}
+    ${placeLine(d.frame)}
+    <div class="block scene"><span class="tag">WORLD ${String(ledger().length+1).padStart(2,"0")} · DIV ${d.divergence||1}</span>
+      ${studs()}
+      ${paras(d.scene)}
+      <div class="zh">${paras(d.scene_zh)}</div>
+      <div class="looks">${chips}
+        <button class="chip her" data-her="1">${esc(d.herLabel)} <span class="han">${esc(d.herLabel_zh||"")}</span></button>
+      </div>
+      ${found?`<div class="found">${found}</div>`:""}
+    </div>`;
+  main().querySelectorAll("[data-look]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.look; if(!S.looked.includes(i)) S.looked.push(i); renderScene();
+  });
+  main().querySelector("[data-her]").onclick = meetHer;
+  setNav();
+}
+
+function renderTalk(){
+  const d=S.door; let k=0;
+  const turns=S.history.map(t=>{k++;return `
+    <div class="turn ${t.who}">
+      <span class="who">${String(k).padStart(2,"0")} · ${t.who==="you"?"YOU · 你":esc(d.herLabel)}</span>
+      <p class="said">${fmt(t.text)}</p>
+      ${t.zh?`<p class="said zh">${fmt(t.zh)}</p>`:""}
+    </div>`;}).join("");
+  const look = d.appearance?`
+    <div class="block"><span class="tag">Her · 她的样子</span>${studs()}
+      <p class="said">${fmt(d.appearance)}</p>
+      <p class="said zh">${fmt(d.appearance_zh||"")}</p></div>`:"";
+  const sit = d.situation?`
+    <div class="block sit"><span class="tag">Spec plate · 她的情况</span>${studs()}
+      <h2>${esc(d.situation.header)}</h2>
+      <p class="h2zh">${esc(d.situation.header_zh||"")}</p>
+      <div class="plate">${(d.situation.facts||[]).map((f,i)=>`
+        <div class="r"><span class="n">${String(i+1).padStart(2,"0")}</span><span class="v">${esc(f)}<span class="zh">${esc((d.situation.facts_zh||[])[i]||"")}</span></span></div>`).join("")}</div>
+    </div>`:"";
+  main().innerHTML = `
+    ${steps(S.staying?"DOOR":"TALK")}
+    ${placeLine(d.frame)}
+    ${look}${sit}
+    <div class="block"><span class="tag">Talk · 对话</span>
+      <div class="talk">${turns}</div>
+      <form class="ask" id="ask">
+        <input type="text" id="say" placeholder="Say something to her · 和她说点什么" autocomplete="off">
+        <button class="btn" type="submit">SAY <span class="han">说</span></button>
+      </form>
+    </div>
+    <div class="block doorq"><span class="tag">The door · 这扇门</span>
+      <p class="q">${S.staying?"You stayed. The day is nearly over.":"Stay in this world, or keep walking?"}</p>
+      <p class="qzh">${S.staying?"你留下了。这一天快过完了。":"留在这个世界，还是继续走？"}</p>
+      <div class="row">
+        ${S.staying?"":`<button class="btn warm" id="stay">STAY A WHILE <span class="han">留一会儿</span></button>`}
+        <button class="btn" id="walk">KEEP WALKING <span class="han">继续走</span></button>
+      </div>
+    </div>`;
+  $("#ask").onsubmit = onSay;
+  if ($("#stay")) $("#stay").onclick = onStay;
+  $("#walk").onclick = onWalk;
+  setNav();
+}
+
+function renderLedger(){
+  S.view="ledger";
+  const rows=ledger().slice().reverse(), stayed=rows.filter(r=>r.stayed).length;
+  main().innerHTML = `<div class="block"><span class="tag">Inventory · 账本</span>${studs()}
+    <p class="count" style="margin:0 0 1rem">${String(rows.length).padStart(2,"0")} WORLDS · ${String(stayed).padStart(2,"0")} STAYED · 开过 ${rows.length} 扇，留下 ${stayed} 次</p>
+    ${rows.length?rows.map(r=>`
+      <div class="entry${r.stayed?" stayed":""}">
+        <div class="head">DOOR ${String(r.n).padStart(2,"0")} · 第 ${r.n} 扇 ${r.stayed?`<span class="tag2">STAYED 留下了</span>`:""}</div>
+        <p class="line">${esc(r.line)}</p>
+        ${r.line_zh?`<p class="zh">${esc(r.line_zh)}</p>`:""}
+      </div>`).join(""):`<p class="empty">Nothing yet. Open a door. · 还没有。去开一扇门。</p>`}
+    <p class="count" style="margin-top:1.4rem">${S.mode==="own"?"Your own doors · 你自己的门":"Yuhan’s doors · Yuhan 的门"} · <button class="link" id="reset">START OVER <span class="han">重来</span></button></p>
+  </div>`;
+  $("#reset").onclick = () => {
+    try { localStorage.removeItem(LK.mode); localStorage.removeItem(LK.seed); localStorage.removeItem(LK.ledger); } catch(e){}
+    S.mode=null; S.seed={}; S.door=null; S.qi=0; renderStart();
+  };
+  setNav();
+}
+
+const busy = (en,zh) => { main().innerHTML = `<div class="block"><span class="tag">Working</span><p class="thinking">${esc(en)}<br><span class="han">${esc(zh)}</span></p></div>`; };
+function fail(msg, retry){
+  main().innerHTML = `<div class="block"><span class="tag">Stuck</span><p class="err">${esc(msg)}</p>
+    <div class="row" style="margin-top:.8rem"><button class="btn" id="retry">TRY AGAIN <span class="han">再试一次</span></button>
+    <button class="btn" id="back">BACK <span class="han">返回</span></button></div></div>`;
+  $("#retry").onclick = retry;
+  $("#back").onclick = () => renderCorridor();
+}
+
+// ------------------------------------------------------------------ flow
+async function openDoor(){
+  if (API.includes("YOUR-SUBDOMAIN")) {
+    main().innerHTML = `<div class="block"><span class="tag">Not open yet · 还没开放</span>${studs()}
+      <p class="said">The doors are built but not wired up yet. Come back in a day or two.</p>
+      <p class="said zh">门已经做好了，只是还没接上电。过一两天再来。</p>
+      <div class="row" style="margin-top:.9rem"><button class="btn" id="back">BACK <span class="han">返回</span></button></div></div>`;
+    $("#back").onclick = () => renderCorridor();
+    return;
+  }
+  busy("Opening…","正在开门…");
+  try {
+    const d = await api({ action:"door", mode:S.mode, seed:S.seed, opened: ledger().length });
+    S.door = d; S.token = d.token; S.history=[]; S.looked=[]; S.staying=false;
+    renderScene();
+  } catch (e) {
+    if (e.code === "door_limit") fail("That's all the doors for today — come back tomorrow. · 今天的门开完了，明天再来。", ()=>renderCorridor());
+    else fail("The door didn't open. " + (e.message||""), openDoor);
+  }
+}
+
+function meetHer(){
+  S.view="talk";
+  if (S.door.opener && String(S.door.opener).trim()) S.history.push({ who:"her", text:S.door.opener, zh:S.door.opener_zh||"" });
+  renderTalk();
+}
+
+async function onSay(ev){
+  ev.preventDefault();
+  const input=$("#say"), text=input.value.trim();
+  if (!text) return;
+  input.value="";
+  S.history.push({who:"you",text,zh:""});
+  S.history.push({who:"her",text:"…",zh:""});
+  renderTalk();
+  const idx=S.history.length-1;
+  try {
+    const r = await api({ action:"say", token:S.token, said:text, transcript:S.history.slice(0,-1), staying:S.staying });
+    S.history[idx] = { who:"her", text:r.en||"…", zh:r.zh||"" };
+  } catch (e) {
+    S.history[idx] = { who:"her", text: e.code==="say_limit" ? "*(not today)*" : "*(she doesn't answer)*",
+                       zh: e.code==="say_limit" ? "*(今天就到这里)*" : "*(她没有回答)*" };
+  }
+  renderTalk();
+  if ($("#say")) $("#say").focus();
+}
+
+async function onStay(){
+  busy("You stay…","你留下了…");
+  try {
+    const r = await api({ action:"stay", token:S.token });
+    S.token = r.token;
+    S.staying = true;
+    S.door.frame = r.frame; S.door.scene = r.scene; S.door.scene_zh = r.scene_zh;
+    S.history.push({ who:"her", text:r.opener, zh:r.opener_zh||"" });
+  } catch (e) { S.staying = true; }
+  renderTalk();
+}
+
+async function onWalk(){
+  busy("Writing her into the ledger…","正在把她写进账本…");
+  let en="", zh="";
+  try {
+    const r = await api({ action:"ledger", token:S.token, transcript:S.history,
+                          facts:(S.door.situation&&S.door.situation.facts)||[] });
+    en=r.en; zh=r.zh;
+  } catch (e) {}
+  if (!en) en = (S.door.situation ? S.door.situation.header : "Unknown.") + " A door you walked out of.";
+  const rows = ledger();
+  rows.push({ n: rows.length+1, line: en, line_zh: zh, stayed: S.staying });
+  saveLedger(rows);
+  renderCorridor();
+}
+
+// ------------------------------------------------------------------ boot
+function applySkin(s){
+  if (s==="dusk") document.documentElement.setAttribute("data-skin","dusk");
+  else document.documentElement.removeAttribute("data-skin");
+  $("#skin").textContent = s==="dusk" ? "DAY" : "DUSK";
+  set(LK.skin, s);
+}
+$("#skin").onclick = () => applySkin(document.documentElement.getAttribute("data-skin")==="dusk" ? "day" : "dusk");
+$("#nav").onclick = () => {
+  if (S.view==="start" || S.view==="ask") return;
+  if (S.view==="ledger"){ if (S.door){ S.view="talk"; renderTalk(); } else renderCorridor(); }
+  else renderLedger();
+};
+
+applySkin(get(LK.skin) || "day");
+S.mode = get(LK.mode);
+try { S.seed = JSON.parse(get(LK.seed) || "{}"); } catch(e){ S.seed={}; }
+if (!S.mode) renderStart(); else renderCorridor();
+</script>
+</body>
+</html>

@@ -178,14 +178,28 @@ const main = () => $("#main");
 
 const get = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
 const set = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} };
-const ledger = () => { try { return JSON.parse(get(LK.ledger) || "[]"); } catch(e){ return []; } };
-const saveLedger = r => set(LK.ledger, JSON.stringify(r));
+// each corridor keeps its own ledger
+const ledgerKey = () => S.mode==="own" ? "doors.ledger.own.w1" : "doors.ledger.yuhan.w1";
+const ledger = () => { try { return JSON.parse(get(ledgerKey()) || "[]"); } catch(e){ return []; } };
+const saveLedger = r => set(ledgerKey(), JSON.stringify(r));
+const savedSeed = () => { try { return JSON.parse(get(LK.seed) || "{}"); } catch(e){ return {}; } };
+const hasSeed = () => Object.keys(savedSeed()).length > 0;
+// words that change with the corridor: in your own doors it is "the other you", never he/she
+const W = () => S.mode==="own"
+  ? { her:"the other you", herZh:"另一个你", look:"The other you · 另一个你的样子", plate:"Spec plate · 另一个你的情况",
+      say:"Say something to the other you · 和另一个你说点什么", quiet:"*(no answer)*", quietZh:"*(没有回答)*",
+      gone:"*(they have to go — keep walking, there are other doors)*", goneZh:"*(得走了——继续走吧，还有别的门)*",
+      ledger:["Writing the other you into the ledger…","正在把另一个你写进账本…"] }
+  : { her:"her", herZh:"她", look:"Her · 她的样子", plate:"Spec plate · 她的情况",
+      say:"Say something to her · 和她说点什么", quiet:"*(she doesn't answer)*", quietZh:"*(她没有回答)*",
+      gone:"*(she has to go — keep walking, there are other doors)*", goneZh:"*(她得走了——继续走吧，还有别的门)*",
+      ledger:["Writing her into the ledger…","正在把她写进账本…"] };
 
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = s => esc(s).replace(/\*\(([^)]*)\)\*/g,"<em>($1)</em>").replace(/\*([^*]+)\*/g,"<em>$1</em>");
 const paras = s => String(s||"").split(/\n\n+/).filter(Boolean).map(p=>`<p>${fmt(p)}</p>`).join("");
 const studs = () => `<div class="studs"><i></i><i></i><i></i></div>`;
-const steps = at => { const o=["SCENE","HER","TALK","DOOR"], i=o.indexOf(at);
+const steps = at => { const o=["SCENE","MEET","TALK","DOOR"], i=o.indexOf(at);
   return `<div class="steps">${o.map((s,k)=>`<b class="${k===i?"on":(k<i?"done":"")}">${s}</b>${k<3?"<span>─</span>":""}`).join("")}</div>`; };
 
 // Owner pass: open doors/?owner=YOUR-KEY once on your own browser. The key is kept in
@@ -224,11 +238,17 @@ function renderStart(){
         <button class="btn warm" id="mine">WALK THROUGH YUHAN’S DOORS <span class="han">走进 Yuhan 的门</span></button>
         <button class="btn" id="own">WALK THROUGH YOUR OWN <span class="han">走进你自己的门</span></button>
       </div>
-      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. About privacy: your answers are kept in your own browser, not saved by this site. To write her replies, what you type passes through this site’s small server to an AI service (DeepSeek); nothing is stored along the way.</p>
-      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。关于隐私：你的回答只保存在你自己的浏览器里，本站不会存下来。为了生成她的回复，你输入的内容会经过本站的小服务器发送给一个 AI 服务（DeepSeek）；途中不做任何保存。</p>
+      ${hasSeed()?`<p class="count" style="margin-top:.8rem"><button class="link" id="redo">ANSWER YOUR QUESTIONS AGAIN <span class="han">重新回答问题</span></button></p>`:""}
+      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. About privacy: your answers are kept in your own browser, not saved by this site. To write the replies, what you type passes through this site’s small server to an AI service (DeepSeek); nothing is stored along the way.</p>
+      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。关于隐私：你的回答只保存在你自己的浏览器里，本站不会存下来。为了生成回复，你输入的内容会经过本站的小服务器发送给一个 AI 服务（DeepSeek）；途中不做任何保存。</p>
     </div>`;
-  $("#mine").onclick = () => { S.mode="yuhan"; S.seed={}; set(LK.mode,"yuhan"); set(LK.seed,"{}"); renderCorridor(); };
-  $("#own").onclick = () => { S.mode="own"; S.seed={}; S.qi=0; renderQuestion(); };
+  $("#mine").onclick = () => { S.mode="yuhan"; S.seed={}; set(LK.mode,"yuhan"); renderCorridor(); };
+  $("#own").onclick = () => {
+    S.mode="own";
+    if (hasSeed()) { S.seed=savedSeed(); set(LK.mode,"own"); renderCorridor(); }
+    else { S.seed={}; S.qi=0; renderQuestion(); }
+  };
+  if ($("#redo")) $("#redo").onclick = () => { S.mode="own"; S.seed={}; S.qi=0; renderQuestion(); };
   setNav();
 }
 
@@ -246,6 +266,7 @@ function renderQuestion(){
         <div class="row" style="margin-top:.8rem">
           <button class="btn warm" id="qdone">DONE <span class="han">写完了</span></button>
           <button class="btn" id="qmic" hidden>SPEAK <span class="han">说话</span></button>
+          <button class="link" id="qlang" hidden></button>
           <span class="count" id="qstate"></span>
         </div>`:""}
       ${q.free && !q.open?`<form class="ask" id="qform">
@@ -271,12 +292,15 @@ function renderQuestion(){
 // the browser's own speech recognition — Chrome and Edge have it, Safari mostly doesn't
 function wireMic(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const btn=$("#qmic"), box=$("#qtext"), st=$("#qstate");
+  const btn=$("#qmic"), box=$("#qtext"), st=$("#qstate"), lb=$("#qlang");
   if (!SR || !btn) return;
-  btn.hidden=false;
+  btn.hidden=false; lb.hidden=false;
   const rec = new SR();
   rec.continuous = true; rec.interimResults = true;
-  rec.lang = (navigator.language||"en").toLowerCase().startsWith("zh") ? "zh-CN" : "en-US";
+  rec.lang = get("doors.voice.w1") || ((navigator.language||"en").toLowerCase().startsWith("zh") ? "zh-CN" : "en-US");
+  const showLang = () => { lb.innerHTML = rec.lang==="zh-CN" ? '<span class="han">中文</span> · SWITCH TO EN' : 'EN · <span class="han">切换到中文</span>'; };
+  showLang();
+  lb.onclick = () => { if (live) rec.stop(); rec.lang = rec.lang==="zh-CN" ? "en-US" : "zh-CN"; set("doors.voice.w1", rec.lang); showLang(); };
   let base="", live=false;
   rec.onresult = e => {
     let interim="", final="";
@@ -307,10 +331,12 @@ function renderCorridor(bait, baitZh){
       <div class="row" style="justify-content:center;margin-top:1rem">
         <button class="btn warm" id="open2">OPEN THE DOOR <span class="han">开门</span></button>
       </div>
+      <p class="count" style="margin-top:.9rem">${S.mode==="own"?"Your own doors · 你自己的门":"Yuhan’s doors · Yuhan 的门"} · <button class="link" id="switch">OTHER CORRIDOR <span class="han">换一条走廊</span></button></p>
       <p class="count">${n===0?"00 DOORS · 还没开过门":String(n).padStart(2,"0")+(n===1?" DOOR":" DOORS")+" · 开过 "+n+" 扇"}</p>
     </div>`;
   const go = () => { $("#open").classList.add("going"); setTimeout(openDoor, 320); };
   $("#open").onclick = go; $("#open2").onclick = go;
+  $("#switch").onclick = () => renderStart();
   setNav();
 }
 
@@ -348,11 +374,11 @@ function renderTalk(){
       ${t.zh?`<p class="said zh">${fmt(t.zh)}</p>`:""}
     </div>`;}).join("");
   const look = d.appearance?`
-    <div class="block"><span class="tag">Her · 她的样子</span>${studs()}
+    <div class="block"><span class="tag">${W().look}</span>${studs()}
       <p class="said">${fmt(d.appearance)}</p>
       <p class="said zh">${fmt(d.appearance_zh||"")}</p></div>`:"";
   const sit = d.situation?`
-    <div class="block sit"><span class="tag">Spec plate · 她的情况</span>${studs()}
+    <div class="block sit"><span class="tag">${W().plate}</span>${studs()}
       <h2>${esc(d.situation.header)}</h2>
       <p class="h2zh">${esc(d.situation.header_zh||"")}</p>
       <div class="plate">${(d.situation.facts||[]).map((f,i)=>`
@@ -365,7 +391,7 @@ function renderTalk(){
     <div class="block"><span class="tag">Talk · 对话</span>
       <div class="talk">${turns}</div>
       <form class="ask" id="ask">
-        <input type="text" id="say" placeholder="Say something to her · 和她说点什么" autocomplete="off">
+        <input type="text" id="say" placeholder="${W().say}" autocomplete="off">
         <button class="btn" type="submit">SAY <span class="han">说</span></button>
       </form>
     </div>
@@ -394,10 +420,10 @@ function renderLedger(){
         <p class="line">${esc(r.line)}</p>
         ${r.line_zh?`<p class="zh">${esc(r.line_zh)}</p>`:""}
       </div>`).join(""):`<p class="empty">Nothing yet. Open a door. · 还没有。去开一扇门。</p>`}
-    <p class="count" style="margin-top:1.4rem">${S.mode==="own"?"Your own doors · 你自己的门":"Yuhan’s doors · Yuhan 的门"} · <button class="link" id="reset">START OVER <span class="han">重来</span></button></p>
+    <p class="count" style="margin-top:1.4rem">${S.mode==="own"?"Your own doors · 你自己的门":"Yuhan’s doors · Yuhan 的门"} · <button class="link" id="reset">CLEAR THIS CORRIDOR <span class="han">清空这条走廊</span></button></p>
   </div>`;
   $("#reset").onclick = () => {
-    try { localStorage.removeItem(LK.mode); localStorage.removeItem(LK.seed); localStorage.removeItem(LK.ledger); } catch(e){}
+    try { localStorage.removeItem(ledgerKey()); if (S.mode==="own") localStorage.removeItem(LK.seed); localStorage.removeItem(LK.mode); } catch(e){}
     S.mode=null; S.seed={}; S.door=null; S.qi=0; renderStart();
   };
   setNav();
@@ -452,8 +478,9 @@ async function onSay(ev){
     const r = await api({ action:"say", token:S.token, said:text, transcript:S.history.slice(0,-1), staying:S.staying });
     S.history[idx] = { who:"her", text:r.en||"…", zh:r.zh||"" };
   } catch (e) {
-    S.history[idx] = { who:"her", text: e.code==="say_limit" ? "*(not today)*" : "*(she doesn't answer)*",
-                       zh: e.code==="say_limit" ? "*(今天就到这里)*" : "*(她没有回答)*" };
+    S.history[idx] = e.code==="say_limit" ? { who:"her", text:"*(not today)*", zh:"*(今天就到这里)*" }
+                   : e.code==="conv_limit" ? { who:"her", text:W().gone, zh:W().goneZh }
+                   : { who:"her", text:W().quiet, zh:W().quietZh };
   }
   renderTalk();
   if ($("#say")) $("#say").focus();
@@ -472,7 +499,7 @@ async function onStay(){
 }
 
 async function onWalk(){
-  busy("Writing her into the ledger…","正在把她写进账本…");
+  busy(...W().ledger);
   let en="", zh="";
   try {
     const r = await api({ action:"ledger", token:S.token, transcript:S.history,
@@ -502,7 +529,8 @@ $("#nav").onclick = () => {
 
 applySkin(get(LK.skin) || "day");
 S.mode = get(LK.mode);
-try { S.seed = JSON.parse(get(LK.seed) || "{}"); } catch(e){ S.seed={}; }
+try { const old=get(LK.ledger); if (old && S.mode && !get(ledgerKey())) { set(ledgerKey(), old); localStorage.removeItem(LK.ledger); } } catch(e){}
+S.seed = S.mode==="own" ? savedSeed() : {};
 if (!S.mode) renderStart(); else renderCorridor();
 </script>
 </body>

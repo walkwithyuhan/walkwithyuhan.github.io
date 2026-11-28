@@ -154,22 +154,34 @@ const API = "https://doors-api.yuhanxie2021-33f.workers.dev";
 
 const QUESTIONS = [
   { k:"age", en:"How old are you?", zh:"你多大？", ph:"31", free:true },
-  { k:"home", en:"Where did you grow up?", zh:"你在哪里长大？", ph:"a town, a city, a country", free:true },
-  { k:"city", en:"A city you almost moved to.", zh:"一个你差点搬去的城市。", ph:"the one you still think about", free:true,
+  { k:"home", en:"Where were you born, and which cities have you lived in since?", zh:"你在哪里出生？之后在哪些城市生活过？",
+    sub:"For example: born in A, university in B, first job in C.", sub_zh:"比如：在 A 出生，在 B 上大学，在 C 开始第一份工作。",
+    ph:"born in…, then…", free:true },
+  { k:"now", en:"Where do you live now, and what do you do?", zh:"你现在住在哪里？做什么？", ph:"a city, and your work or days", free:true },
+  { k:"city", en:"A city or country you almost moved to.", zh:"一个你差点搬去的城市或国家。", ph:"the one you still think about", free:true,
     opts:[{en:"There wasn't one", zh:"没有过", val:""}] },
+  { k:"safe", en:"An opportunity you said no to, and still remember.", zh:"一个你拒绝了、但至今还记得的机会。", ph:"or say what it was", free:true,
+    opts:[{en:"A job",zh:"一份工作",val:"a job offer"},{en:"A school",zh:"一所学校",val:"a place at a school"},
+          {en:"A move",zh:"一次搬家",val:"a move to another city or country"},{en:"A relationship",zh:"一段感情",val:"a relationship"},
+          {en:"Never came up",zh:"没遇过",val:""}] },
   { k:"quit", en:"What did you quit that you were good at?", zh:"你放弃了什么本来擅长的事？", ph:"or type your own", free:true,
     opts:[{en:"An instrument",zh:"一个乐器",val:"playing an instrument"},{en:"A sport",zh:"一项运动",val:"a sport"},
           {en:"Drawing or writing",zh:"画画或写作",val:"drawing and writing"},{en:"A subject",zh:"一门专业",val:"a subject they were good at"}] },
-  { k:"safe", en:"Someone offered you something safe.", zh:"有人给过你一份稳妥的东西。", ph:"or say what it was", free:true,
-    opts:[{en:"I took it",zh:"我接了",val:"a safe job or place they accepted"},{en:"I turned it down",zh:"我拒了",val:"a safe job or place they turned down"},
-          {en:"Never came up",zh:"没遇过",val:""}] },
-  { k:"met", en:"Who did you meet by accident, who changed everything?", zh:"谁是你偶然遇见、却改变了一切的人？", ph:"a name, or who they are to you", free:true,
+  { k:"met", en:"Who did you meet by chance, who changed everything?", zh:"谁是你偶然遇见、却改变了一切的人？",
+    sub:"Your partner, a friend, a teacher, a boss…", sub_zh:"你的伴侣、朋友、老师、上司……",
+    ph:"a name, or who they are to you", free:true,
     opts:[{en:"A partner",zh:"伴侣",val:"the person they ended up with"},{en:"A friend",zh:"朋友",val:"the friend who changed things"},
           {en:"A teacher or boss",zh:"老师或上司",val:"the teacher or boss who changed things"},{en:"Nobody",zh:"没有",val:""}] },
+  { k:"dream", en:"A dream you put aside.", zh:"一个你放下了的梦想。", ph:"or type your own", free:true,
+    opts:[{en:"Travel the world",zh:"环游世界",val:"travelling the world"},{en:"Start something of my own",zh:"自己做点什么",val:"starting something of their own"},
+          {en:"Art, music or writing",zh:"艺术、音乐或写作",val:"art, music or writing"},{en:"A different career",zh:"另一种职业",val:"a completely different career"}] },
   { k:"much", en:"What do you do too much of?", zh:"你做得过多的是什么？", ph:"or type your own", free:true,
     opts:[{en:"Work",zh:"工作",val:"work"},{en:"Pleasing people",zh:"讨好别人",val:"trying to please people"},
           {en:"Thinking",zh:"想",val:"thinking about it"},{en:"Looking after people",zh:"照顾别人",val:"looking after other people"},
           {en:"Planning",zh:"计划",val:"planning"}] },
+  { k:"nature", en:"What do your friends love about you?", zh:"朋友们最喜欢你哪一点？", ph:"or type your own", free:true,
+    opts:[{en:"My humour",zh:"我的幽默",val:"their humour"},{en:"My warmth",zh:"我的温暖",val:"their warmth"},
+          {en:"My drive",zh:"我的干劲",val:"their drive"},{en:"My calm",zh:"我的沉稳",val:"their calm"}] },
   { k:"story", open:true, en:"Now tell me about your life.", zh:"最后，讲讲你的人生。",
     sub:"Anything you like, in any order — where you've lived, what you nearly did, who mattered, what you're still deciding. The more you say, the less generic the people behind the doors will be. Type it or speak it.",
     sub_zh:"想到哪说到哪 —— 你住过哪里、差点做了什么、谁要紧、你至今没想好的是什么。你说得越多，门后面那些人就越不像随便生成的。可以打字，也可以说话。",
@@ -248,8 +260,8 @@ function renderStart(){
         <button class="btn" id="own">WALK THROUGH YOUR OWN <span class="han">走进你自己的门</span></button>
       </div>
       ${hasSeed()?`<p class="count" style="margin-top:.8rem"><button class="link" id="redo">ANSWER YOUR QUESTIONS AGAIN <span class="han">重新回答问题</span></button></p>`:""}
-      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. No sign-up, no name, no email.</p>
-      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。不用注册，不用名字，也不用邮箱。</p>
+      <p class="fine" style="margin-top:1.1rem">Eleven questions, about four minutes. Most are one tap; the last is where you say the rest, typed or spoken. No sign-up, no name, no email.</p>
+      <p class="fine zh">十一个问题，四分钟左右。大多点一下就好，最后一个你可以多说一些，打字或说话都行。不用注册，不用名字，也不用邮箱。</p>
       <details class="privacy">
         <summary>About privacy · 关于隐私</summary>
         <ul>

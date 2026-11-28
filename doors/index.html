@@ -199,8 +199,8 @@ const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<"
 const fmt = s => esc(s).replace(/\*\(([^)]*)\)\*/g,"<em>($1)</em>").replace(/\*([^*]+)\*/g,"<em>$1</em>");
 const paras = s => String(s||"").split(/\n\n+/).filter(Boolean).map(p=>`<p>${fmt(p)}</p>`).join("");
 const studs = () => `<div class="studs"><i></i><i></i><i></i></div>`;
-const steps = at => { const o=["SCENE","MEET","TALK","DOOR"], i=o.indexOf(at);
-  return `<div class="steps">${o.map((s,k)=>`<b class="${k===i?"on":(k<i?"done":"")}">${s}</b>${k<3?"<span>─</span>":""}`).join("")}</div>`; };
+const steps = at => { const o=["LOOK","STAY","TALK"], i=o.indexOf(at);
+  return `<div class="steps">${o.map((s,k)=>`<b class="${k===i?"on":(k<i?"done":"")}">${s}</b>${k<o.length-1?"<span>─</span>":""}`).join("")}</div>`; };
 
 // Owner pass: open doors/?owner=YOUR-KEY once on your own browser. The key is kept in
 // this browser only (never in this public repo) and the server skips the daily caps for it.
@@ -347,23 +347,43 @@ function renderScene(){
   const chips=(d.looks||[]).map((l,i)=>`<button class="chip${S.looked.includes(i)?" used":""}" data-look="${i}"><span class="idx">${String(i+1).padStart(2,"0")}</span>${esc(l.label)} <span class="han">${esc(l.label_zh||"")}</span></button>`).join("");
   const found=S.looked.map(i=>`<p><span class="idx">${String(i+1).padStart(2,"0")}</span>${fmt(d.looks[i].text)}</p><p class="zh">${fmt(d.looks[i].text_zh||"")}</p>`).join("");
   main().innerHTML = `
-    ${steps("SCENE")}
+    ${steps("LOOK")}
     ${placeLine(d.frame)}
     <div class="block scene"><span class="tag">WORLD ${String(ledger().length+1).padStart(2,"0")} · DIV ${d.divergence||1}</span>
       ${studs()}
       ${paras(d.scene)}
       <div class="zh">${paras(d.scene_zh)}</div>
-      <div class="looks">${chips}
-        <button class="chip her" data-her="1">${esc(d.herLabel)} <span class="han">${esc(d.herLabel_zh||"")}</span></button>
-      </div>
+      <div class="looks">${chips}</div>
       ${found?`<div class="found">${found}</div>`:""}
+    </div>
+    ${lookBlock(d)}${sitBlock(d)}
+    <div class="block doorq"><span class="tag">The door · 这扇门</span>
+      <p class="q">Stay a while and talk, or keep walking?</p>
+      <p class="qzh">留一会儿聊聊，还是继续走？</p>
+      <div class="row">
+        <button class="btn warm" id="stay">STAY A WHILE <span class="han">留一会儿</span></button>
+        <button class="btn" id="walk">KEEP WALKING <span class="han">继续走</span></button>
+      </div>
     </div>`;
   main().querySelectorAll("[data-look]").forEach(b=>b.onclick=()=>{
     const i=+b.dataset.look; if(!S.looked.includes(i)) S.looked.push(i); renderScene();
   });
-  main().querySelector("[data-her]").onclick = meetHer;
+  $("#stay").onclick = meetHer;
+  $("#walk").onclick = onWalk;
   setNav();
 }
+
+function lookBlock(d){ return d.appearance?`
+    <div class="block"><span class="tag">${W().look}</span>${studs()}
+      <p class="said">${fmt(d.appearance)}</p>
+      <p class="said zh">${fmt(d.appearance_zh||"")}</p></div>`:""; }
+function sitBlock(d){ return d.situation?`
+    <div class="block sit"><span class="tag">${W().plate}</span>${studs()}
+      <h2>${esc(d.situation.header)}</h2>
+      <p class="h2zh">${esc(d.situation.header_zh||"")}</p>
+      <div class="plate">${(d.situation.facts||[]).map((f,i)=>`
+        <div class="r"><span class="n">${String(i+1).padStart(2,"0")}</span><span class="v">${esc(f)}<span class="zh">${esc((d.situation.facts_zh||[])[i]||"")}</span></span></div>`).join("")}</div>
+    </div>`:""; }
 
 function renderTalk(){
   const d=S.door; let k=0;
@@ -373,21 +393,9 @@ function renderTalk(){
       <p class="said">${fmt(t.text)}</p>
       ${t.zh?`<p class="said zh">${fmt(t.zh)}</p>`:""}
     </div>`;}).join("");
-  const look = d.appearance?`
-    <div class="block"><span class="tag">${W().look}</span>${studs()}
-      <p class="said">${fmt(d.appearance)}</p>
-      <p class="said zh">${fmt(d.appearance_zh||"")}</p></div>`:"";
-  const sit = d.situation?`
-    <div class="block sit"><span class="tag">${W().plate}</span>${studs()}
-      <h2>${esc(d.situation.header)}</h2>
-      <p class="h2zh">${esc(d.situation.header_zh||"")}</p>
-      <div class="plate">${(d.situation.facts||[]).map((f,i)=>`
-        <div class="r"><span class="n">${String(i+1).padStart(2,"0")}</span><span class="v">${esc(f)}<span class="zh">${esc((d.situation.facts_zh||[])[i]||"")}</span></span></div>`).join("")}</div>
-    </div>`:"";
   main().innerHTML = `
-    ${steps(S.staying?"DOOR":"TALK")}
+    ${steps("TALK")}
     ${placeLine(d.frame)}
-    ${look}${sit}
     <div class="block"><span class="tag">Talk · 对话</span>
       <div class="talk">${turns}</div>
       <form class="ask" id="ask">
@@ -396,15 +404,13 @@ function renderTalk(){
       </form>
     </div>
     <div class="block doorq"><span class="tag">The door · 这扇门</span>
-      <p class="q">${S.staying?"You stayed. The day is nearly over.":"Stay in this world, or keep walking?"}</p>
-      <p class="qzh">${S.staying?"你留下了。这一天快过完了。":"留在这个世界，还是继续走？"}</p>
+      <p class="q">Leave whenever you like. This world will still be here.</p>
+      <p class="qzh">想走随时可以走，这个世界还在这里。</p>
       <div class="row">
-        ${S.staying?"":`<button class="btn warm" id="stay">STAY A WHILE <span class="han">留一会儿</span></button>`}
         <button class="btn" id="walk">KEEP WALKING <span class="han">继续走</span></button>
       </div>
     </div>`;
   $("#ask").onsubmit = onSay;
-  if ($("#stay")) $("#stay").onclick = onStay;
   $("#walk").onclick = onWalk;
   setNav();
 }
@@ -451,7 +457,7 @@ async function openDoor(){
   busy("Opening…","正在开门…");
   try {
     const d = await api({ action:"door", mode:S.mode, seed:S.seed, opened: ledger().length });
-    S.door = d; S.token = d.token; S.history=[]; S.looked=[]; S.staying=false;
+    S.door = d; S.token = d.token; S.history=[]; S.looked=[]; S.staying=false; S.met=false; S.view="scene";
     renderScene();
   } catch (e) {
     if (e.code === "door_limit") fail("That's all the doors for today — come back tomorrow. · 今天的门开完了，明天再来。", ()=>renderCorridor());
@@ -460,7 +466,7 @@ async function openDoor(){
 }
 
 function meetHer(){
-  S.view="talk";
+  S.view="talk"; S.met=true;
   if (S.door.opener && String(S.door.opener).trim()) S.history.push({ who:"her", text:S.door.opener, zh:S.door.opener_zh||"" });
   renderTalk();
 }
@@ -508,7 +514,7 @@ async function onWalk(){
   } catch (e) {}
   if (!en) en = (S.door.situation ? S.door.situation.header : "Unknown.") + " A door you walked out of.";
   const rows = ledger();
-  rows.push({ n: rows.length+1, line: en, line_zh: zh, stayed: S.staying });
+  rows.push({ n: rows.length+1, line: en, line_zh: zh, stayed: !!S.met });
   saveLedger(rows);
   renderCorridor();
 }
@@ -523,7 +529,7 @@ function applySkin(s){
 $("#skin").onclick = () => applySkin(document.documentElement.getAttribute("data-skin")==="dusk" ? "day" : "dusk");
 $("#nav").onclick = () => {
   if (S.view==="start" || S.view==="ask") return;
-  if (S.view==="ledger"){ if (S.door){ S.view="talk"; renderTalk(); } else renderCorridor(); }
+  if (S.view==="ledger"){ if (S.door){ if (S.met){ S.view="talk"; renderTalk(); } else { S.view="scene"; renderScene(); } } else renderCorridor(); }
   else renderLedger();
 };
 

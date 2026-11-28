@@ -62,6 +62,10 @@
   .count{font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;color:var(--ink-faint);margin:1rem 0 0}
   .fine{font-size:.78rem;font-style:italic;line-height:1.55;color:var(--ink-faint);margin:.5rem 0 0}
   .fine.zh{font-family:var(--han)}
+  .where{background:var(--red);color:var(--card);border:2px solid var(--rule);box-shadow:var(--shadow);padding:.7rem .9rem;margin-bottom:1rem;font-family:var(--grotesk);font-size:.875rem;line-height:1.45}
+  .where.own{background:var(--grass)}
+  .where b{font-weight:700}
+  .where .han{display:block;margin-top:.3rem;font-family:var(--han);font-weight:400;opacity:.95}
   .whose{font-family:var(--grotesk);font-weight:700;font-size:.875rem;letter-spacing:.02em;margin:.1rem 0 .9rem;color:var(--ink)}
   .whose .han{display:block;font-family:var(--han);font-weight:400;margin-top:.2rem;color:var(--ink-dim)}
   details.privacy{margin-top:.9rem;text-align:left;font-size:.82rem;line-height:1.55;color:var(--ink-dim)}
@@ -377,6 +381,10 @@ function renderCorridor(bait, baitZh){
   setNav();
 }
 
+// a clear sign of whose universe the visitor is standing in
+const whereBanner = () => S.mode==="own"
+  ? `<div class="where own"><b>You’re stepping into your own other universe.</b> This is you, if you had chosen differently.<span class="han">你正走进你自己的另一个宇宙。这是当初选得不一样的你。</span></div>`
+  : `<div class="where"><b>You’re walking into Yuhan’s alternative universe.</b> The woman you’ll meet is Yuhan — a version of her who chose differently.<span class="han">你正走进 Yuhan 的平行宇宙。你将遇见的是 Yuhan —— 一个当初选得不一样的她。</span></div>`;
 const placeLine = f => f ? `<p class="place">${esc(f.kind)} <span class="han">${esc(f.zh||"")}</span> · ${esc(f.hour)}</p>` : "";
 
 function renderScene(){
@@ -384,6 +392,7 @@ function renderScene(){
   const chips=(d.looks||[]).map((l,i)=>`<button class="chip${S.looked.includes(i)?" used":""}" data-look="${i}"><span class="idx">${String(i+1).padStart(2,"0")}</span>${esc(l.label)} <span class="han">${esc(l.label_zh||"")}</span></button>`).join("");
   const found=S.looked.map(i=>`<p><span class="idx">${String(i+1).padStart(2,"0")}</span>${fmt(d.looks[i].text)}</p><p class="zh">${fmt(d.looks[i].text_zh||"")}</p>`).join("");
   main().innerHTML = `
+    ${whereBanner()}
     ${steps("LOOK")}
     ${placeLine(d.frame)}
     <div class="block scene"><span class="tag">WORLD ${String(ledger().length+1).padStart(2,"0")} · DIV ${d.divergence||1}</span>
@@ -431,6 +440,7 @@ function renderTalk(){
       ${t.zh?`<p class="said zh">${fmt(t.zh)}</p>`:""}
     </div>`;}).join("");
   main().innerHTML = `
+    ${whereBanner()}
     ${steps("TALK")}
     ${placeLine(d.frame)}
     <div class="block"><span class="tag">Talk · 对话</span>

@@ -171,7 +171,7 @@ const QUESTIONS = [
     ph:"I grew up in…" }
 ];
 
-const LK = { ledger:"doors.ledger.w1", skin:"doors.skin.w1", mode:"doors.mode.w1", seed:"doors.seed.w1" };
+const LK = { ledger:"doors.ledger.w1", skin:"doors.skin.w1", mode:"doors.mode.w1", seed:"doors.seed.w1", owner:"doors.owner.w1" };
 const S = { view:"start", mode:null, seed:{}, qi:0, door:null, token:null, history:[], looked:[], staying:false };
 const $ = s => document.querySelector(s);
 const main = () => $("#main");
@@ -188,8 +188,23 @@ const studs = () => `<div class="studs"><i></i><i></i><i></i></div>`;
 const steps = at => { const o=["SCENE","HER","TALK","DOOR"], i=o.indexOf(at);
   return `<div class="steps">${o.map((s,k)=>`<b class="${k===i?"on":(k<i?"done":"")}">${s}</b>${k<3?"<span>─</span>":""}`).join("")}</div>`; };
 
+// Owner pass: open doors/?owner=YOUR-KEY once on your own browser. The key is kept in
+// this browser only (never in this public repo) and the server skips the daily caps for it.
+// Open doors/?owner=off to forget it.
+(() => {
+  try {
+    const u = new URL(location.href), k = u.searchParams.get("owner");
+    if (k === null) return;
+    if (k === "off" || !k) localStorage.removeItem("doors.owner.w1"); else localStorage.setItem("doors.owner.w1", k);
+    u.searchParams.delete("owner");
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  } catch(e){}
+})();
+
 async function api(payload) {
-  const r = await fetch(API, { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify(payload) });
+  const headers = {"content-type":"application/json"};
+  const ok = get(LK.owner); if (ok) headers["x-owner-key"] = ok;
+  const r = await fetch(API, { method:"POST", headers, body: JSON.stringify(payload) });
   const data = await r.json().catch(()=>({error:"bad response"}));
   if (!r.ok) throw Object.assign(new Error(data.error || "error"), { code: data.error, cap: data.cap });
   return data;
@@ -209,8 +224,8 @@ function renderStart(){
         <button class="btn warm" id="mine">WALK THROUGH YUHAN’S DOORS <span class="han">走进 Yuhan 的门</span></button>
         <button class="btn" id="own">WALK THROUGH YOUR OWN <span class="han">走进你自己的门</span></button>
       </div>
-      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. Don’t worry about privacy — what you write stays in your own browser, and nobody, including whoever made this, ever sees it.</p>
-      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。隐私不用担心：你写的东西只存在你自己的浏览器里，包括作者在内，没有任何人看得到。</p>
+      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. About privacy: your answers are kept in your own browser, not saved by this site. To write her replies, what you type passes through this site’s small server to an AI service (DeepSeek); nothing is stored along the way.</p>
+      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。关于隐私：你的回答只保存在你自己的浏览器里，本站不会存下来。为了生成她的回复，你输入的内容会经过本站的小服务器发送给一个 AI 服务（DeepSeek）；途中不做任何保存。</p>
     </div>`;
   $("#mine").onclick = () => { S.mode="yuhan"; S.seed={}; set(LK.mode,"yuhan"); set(LK.seed,"{}"); renderCorridor(); };
   $("#own").onclick = () => { S.mode="own"; S.seed={}; S.qi=0; renderQuestion(); };

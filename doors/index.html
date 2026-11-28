@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Doors · 门</title>
-<meta name="description" content="Open a door onto a life you didn't live, and talk to the person living it.">
+<title>随机漫步 · Random Walk</title>
+<meta name="description" content="随机漫步 · Random Walk — open a door onto a life you didn't live, and talk to the person living it.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=Noto+Serif+SC:wght@300;400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
@@ -62,6 +62,11 @@
   .count{font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;color:var(--ink-faint);margin:1rem 0 0}
   .fine{font-size:.78rem;font-style:italic;line-height:1.55;color:var(--ink-faint);margin:.5rem 0 0}
   .fine.zh{font-family:var(--han)}
+  details.privacy{margin-top:.9rem;text-align:left;font-size:.82rem;line-height:1.55;color:var(--ink-dim)}
+  details.privacy summary{font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;cursor:pointer;color:var(--ink);text-transform:uppercase}
+  details.privacy ul{margin:.6rem 0 0;padding-left:1.1rem}
+  details.privacy li{margin-bottom:.55rem}
+  details.privacy .zh{font-family:var(--han)}
   .place{font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em;color:var(--card);margin:0 0 .7rem;text-transform:uppercase}
   .place .han{font-family:var(--han);text-transform:none}
   .steps{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-family:var(--mono);font-size:.625rem;
@@ -134,7 +139,7 @@
 <body>
 <div class="wrap">
   <header>
-    <a class="mark" href="../#things">DOORS <span class="han">门</span></a>
+    <a class="mark" href="../#things">RANDOM WALK <span class="han">随机漫步</span></a>
     <span class="tools">
       <button class="link" id="skin"></button>
       <button class="link" id="nav"></button>
@@ -239,8 +244,17 @@ function renderStart(){
         <button class="btn" id="own">WALK THROUGH YOUR OWN <span class="han">走进你自己的门</span></button>
       </div>
       ${hasSeed()?`<p class="count" style="margin-top:.8rem"><button class="link" id="redo">ANSWER YOUR QUESTIONS AGAIN <span class="han">重新回答问题</span></button></p>`:""}
-      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. About privacy: your answers are kept in your own browser, not saved by this site. To write the replies, what you type passes through this site’s small server to an AI service (DeepSeek); nothing is stored along the way.</p>
-      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。关于隐私：你的回答只保存在你自己的浏览器里，本站不会存下来。为了生成回复，你输入的内容会经过本站的小服务器发送给一个 AI 服务（DeepSeek）；途中不做任何保存。</p>
+      <p class="fine" style="margin-top:1.1rem">Eight questions, about three minutes. The first seven are small; the eighth is where you say the rest, typed or spoken. No sign-up, no name, no email.</p>
+      <p class="fine zh">八个问题，三分钟左右。前七个很小，第八个你可以多说一些，打字或说话都行。不用注册，不用名字，也不用邮箱。</p>
+      <details class="privacy">
+        <summary>About privacy · 关于隐私</summary>
+        <ul>
+          <li><b>Kept in your browser:</b> your answers to the questions and your ledger of doors. This site does not store them, and you can wipe them any time with “Clear this corridor”.<br><span class="zh">只存在你自己的浏览器里：你对问题的回答和开过的门的账本。本站不保存，你随时可以用“清空这条走廊”删掉。</span></li>
+          <li><b>Sent to write the replies:</b> when you open a door or say something, your answers and messages pass through this site’s small server to an AI service, DeepSeek, which writes what the other you says. This site saves none of it; what DeepSeek keeps is covered by DeepSeek’s own privacy policy.<br><span class="zh">为了生成回复会发送出去：你开门或说话时，你的回答和消息会经过本站的小服务器，发给 AI 服务 DeepSeek，由它写出“另一个你”说的话。本站不保存这些内容；DeepSeek 会保留什么，以它自己的隐私政策为准。</span></li>
+          <li><b>Used for fair limits:</b> your internet (IP) address is used to count the daily number of doors and messages, and that count disappears after about a day.<br><span class="zh">用于限制次数：你的网络（IP）地址只用来计算每天开门和说话的次数，大约一天后自动清除。</span></li>
+          <li><b>A tip:</b> keep out details you wouldn’t want an AI company to see, like full names, ID numbers or addresses.<br><span class="zh">小建议：别写你不想让 AI 公司看到的信息，比如全名、证件号码或住址。</span></li>
+        </ul>
+      </details>
     </div>`;
   $("#mine").onclick = () => { S.mode="yuhan"; S.seed={}; set(LK.mode,"yuhan"); renderCorridor(); };
   $("#own").onclick = () => {

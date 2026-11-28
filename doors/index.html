@@ -223,6 +223,10 @@ const steps = at => { const o=["LOOK","STAY","TALK"], i=o.indexOf(at);
 async function api(payload) {
   const headers = {"content-type":"application/json"};
   const ok = get(LK.owner); if (ok) headers["x-owner-key"] = ok;
+  // an anonymous random id for this browser, so each visitor gets their own daily limit
+  let vid = get("doors.vid.w1");
+  if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); set("doors.vid.w1", vid); }
+  headers["x-visitor-id"] = vid;
   const r = await fetch(API, { method:"POST", headers, body: JSON.stringify(payload) });
   const data = await r.json().catch(()=>({error:"bad response"}));
   if (!r.ok) throw Object.assign(new Error(data.error || "error"), { code: data.error, cap: data.cap });
@@ -251,7 +255,7 @@ function renderStart(){
         <ul>
           <li><b>Kept in your browser:</b> your answers to the questions and your ledger of doors. This site does not store them, and you can wipe them any time with “Clear this corridor”.<br><span class="zh">只存在你自己的浏览器里：你对问题的回答和开过的门的账本。本站不保存，你随时可以用“清空这条走廊”删掉。</span></li>
           <li><b>Sent to write the replies:</b> when you open a door or say something, your answers and messages pass through this site’s small server to an AI service, DeepSeek, which writes what the other you says. This site saves none of it; what DeepSeek keeps is covered by DeepSeek’s own privacy policy.<br><span class="zh">为了生成回复会发送出去：你开门或说话时，你的回答和消息会经过本站的小服务器，发给 AI 服务 DeepSeek，由它写出“另一个你”说的话。本站不保存这些内容；DeepSeek 会保留什么，以它自己的隐私政策为准。</span></li>
-          <li><b>Used for fair limits:</b> your internet (IP) address is used to count the daily number of doors and messages, and that count disappears after about a day.<br><span class="zh">用于限制次数：你的网络（IP）地址只用来计算每天开门和说话的次数，大约一天后自动清除。</span></li>
+          <li><b>Used for fair limits:</b> a random anonymous ID kept in your browser, plus your internet (IP) address, are used to count the daily number of doors and messages; the counts disappear after about a day.<br><span class="zh">用于限制次数：浏览器里一个随机的匿名编号，加上你的网络（IP）地址，只用来计算每天开门和说话的次数，大约一天后自动清除。</span></li>
           <li><b>A tip:</b> keep out details you wouldn’t want an AI company to see, like full names, ID numbers or addresses.<br><span class="zh">小建议：别写你不想让 AI 公司看到的信息，比如全名、证件号码或住址。</span></li>
         </ul>
       </details>
